@@ -155,6 +155,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     return result;
 }
 
+//得到chain的block个数
 static UniValue getblockcount(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -172,6 +173,7 @@ static UniValue getblockcount(const JSONRPCRequest& request)
     return chainActive.Height();
 }
 
+//得到最后一个block的hash
 static UniValue getbestblockhash(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -490,6 +492,7 @@ static UniValue getrawmempool(const JSONRPCRequest& request)
     return mempoolToJSON(fVerbose);
 }
 
+//返回某交易的前置
 static UniValue getmempoolancestors(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 2) {
@@ -554,6 +557,7 @@ static UniValue getmempoolancestors(const JSONRPCRequest& request)
     }
 }
 
+//返回某交易的后继
 static UniValue getmempooldescendants(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 2) {
@@ -651,6 +655,7 @@ static UniValue getmempoolentry(const JSONRPCRequest& request)
     return info;
 }
 
+//得到第几个block的hashcode
 static UniValue getblockhash(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -957,6 +962,7 @@ static UniValue pruneblockchain(const JSONRPCRequest& request)
     return uint64_t(height);
 }
 
+//返回未花费对交易output统计
 static UniValue gettxoutsetinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -1177,6 +1183,7 @@ static void BIP9SoftForkDescPushBack(UniValue& bip9_softforks, const Consensus::
         bip9_softforks.pushKV(VersionBitsDeploymentInfo[id].name, BIP9SoftForkDesc(consensusParams, id));
 }
 
+//得到整个blockchain的相关信息
 UniValue getblockchaininfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -1549,6 +1556,7 @@ static UniValue reconsiderblock(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+//交易相关的统计，给定一个block，一个count，返回往前count个block里包含的交易数及时间
 static UniValue getchaintxstats(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() > 2)
@@ -1708,6 +1716,7 @@ static UniValue getblockstats(const JSONRPCRequest& request)
 
     CBlockIndex* pindex;
     if (request.params[0].isNum()) {
+        //取哪一个block
         const int height = request.params[0].get_int();
         const int current_tip = chainActive.Height();
         if (height < 0) {
@@ -1719,6 +1728,7 @@ static UniValue getblockstats(const JSONRPCRequest& request)
 
         pindex = chainActive[height];
     } else {
+        //按hashcode取block
         const std::string strHash = request.params[0].get_str();
         const uint256 hash(uint256S(strHash));
         pindex = LookupBlockIndex(hash);
@@ -1732,6 +1742,7 @@ static UniValue getblockstats(const JSONRPCRequest& request)
 
     assert(pindex != nullptr);
 
+    //要统计哪些
     std::set<std::string> stats;
     if (!request.params[1].isNull()) {
         const UniValue stats_univalue = request.params[1].get_array();
@@ -1775,9 +1786,10 @@ static UniValue getblockstats(const JSONRPCRequest& request)
     std::vector<CAmount> feerate_array;
     std::vector<int64_t> txsize_array;
 
+    //block中的所有交易
     for (const auto& tx : block.vtx) {
         outputs += tx->vout.size();
-
+        //output钱数
         CAmount tx_total_out = 0;
         if (loop_outputs) {
             for (const CTxOut& out : tx->vout) {
@@ -1823,6 +1835,7 @@ static UniValue getblockstats(const JSONRPCRequest& request)
                 throw JSONRPCError(RPC_INVALID_PARAMETER, "One or more of the selected stats requires -txindex enabled");
             }
             CAmount tx_total_in = 0;
+            //统计所有vin
             for (const CTxIn& in : tx->vin) {
                 CTransactionRef tx_in;
                 uint256 hashBlock;
@@ -2022,6 +2035,7 @@ CTxDestination GetDestinationForKey(const CPubKey& key, OutputScriptType type)
     }
 }
 
+//找出某个地址之类所有未花费的交易
 UniValue scantxoutset(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
@@ -2208,6 +2222,7 @@ UniValue scantxoutset(const JSONRPCRequest& request)
     return result;
 }
 
+//相关rpc
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------

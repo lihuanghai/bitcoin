@@ -1254,16 +1254,20 @@ bool AppInitMain()
             gArgs.GetArg("-datadir", ""), fs::current_path().string());
     }
 
+    //签名缓存，避免多次签名，具体如何使用需要再看下
     InitSignatureCache();
+    //?
     InitScriptExecutionCache();
 
     LogPrintf("Using %u threads for script verification\n", nScriptCheckThreads);
+    //创建若干个script check线程
     if (nScriptCheckThreads) {
         for (int i=0; i<nScriptCheckThreads-1; i++)
             threadGroup.create_thread(&ThreadScriptCheck);
     }
 
     // Start the lightweight task scheduler thread
+    //处理后台定时任务线程
     CScheduler::Function serviceLoop = boost::bind(&CScheduler::serviceQueue, &scheduler);
     threadGroup.create_thread(boost::bind(&TraceThread<CScheduler::Function>, "scheduler", serviceLoop));
 
@@ -1273,6 +1277,7 @@ bool AppInitMain()
     /* Register RPC commands regardless of -server setting so they will be
      * available in the GUI RPC console even if external calls are disabled.
      */
+    //注册所有rpc调用
     RegisterAllCoreRPCCommands(tableRPC);
     g_wallet_init_interface.RegisterRPC(tableRPC);
 #if ENABLE_ZMQ
